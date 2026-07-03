@@ -17,7 +17,7 @@ ORDER BY Revenue DESC;
 
 ##### **Result:**
 
-Health & Beauty is the highest revenue-generating product category.
+**Health & Beauty** is the highest revenue-generating product category.
 
 ---
 
