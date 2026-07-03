@@ -4,7 +4,6 @@
 2. How has monthly revenue changed over time?
 3. Which months experience the highest order volumes?
 4. What is the average order value?
-5. Which products contribute the most to total sales?
 
 
 
