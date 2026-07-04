@@ -23,8 +23,7 @@
 1. Which product categories have the highest average price?
 2. Which categories receive the highest ratings?
 3. Which categories have the highest sales volume?
-4. What are the top 10 best-selling products?
-5. Which categories underperform in revenue?
+4. Which categories underperform in revenue?
 
 ---
 
