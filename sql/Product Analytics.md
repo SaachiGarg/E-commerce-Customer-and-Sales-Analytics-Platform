@@ -63,7 +63,7 @@ ORDER BY ItemsSold DESC;
 
 ##### **Result:**
 
-**Bed Bath Table** has the highest sales volume, followed by **Health Beauty** and **Sports Leisure**.
+**Bed, Bath & Table** has the highest sales volume, followed by **Health & Beauty** and **Sports Leisure**.
 
 ---
 
