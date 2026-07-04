@@ -1,302 +1,159 @@
-### Delivery \& Logistics Analytics
+# Delivery & Logistics Analytics
 
+## **1. What is the average delivery time?**
 
+##### **Query:**
 
-1.What is the average delivery time?
-
-
-
-Query:
-
-
-
+```sql
 SELECT
-
-&#x20;   ROUND(
-
-&#x20;       AVG(
-
-&#x20;           DATEDIFF(
-
-&#x20;               order\_delivered\_customer\_date,
-
-&#x20;               order\_purchase\_timestamp
-
-&#x20;           )
-
-&#x20;       ),
-
-&#x20;       2
-
-&#x20;   ) AS AverageDeliveryDays
-
+    ROUND(
+        AVG(
+            DATEDIFF(
+                order_delivered_customer_date,
+                order_purchase_timestamp
+            )
+        ),
+        2
+    ) AS AverageDeliveryDays
 FROM orders
-
 WHERE
+    order_status = 'delivered'
+    AND order_delivered_customer_date IS NOT NULL;
+```
 
-&#x20;   order\_status = 'delivered'
+##### **Result:**
 
-&#x20;   AND order\_delivered\_customer\_date IS NOT NULL;
+The average delivery time is **12.5 days**.
 
+---
 
+## **2. Which states experience the longest delivery delays?**
 
+##### **Query:**
 
-
-Result:
-
-
-
-Average delivery days are 12.5
-
-
-
-
-
-2.Which states experience the longest delivery delays?
-
-
-
-
-
-Query:
-
-
-
+```sql
 SELECT
-
-&#x20;   c.customer\_state AS State,
-
-&#x20;   ROUND(
-
-&#x20;       AVG(
-
-&#x20;           TIMESTAMPDIFF(
-
-&#x20;               HOUR,
-
-&#x20;               o.order\_purchase\_timestamp,
-
-&#x20;               o.order\_delivered\_customer\_date
-
-&#x20;           ) / 24
-
-&#x20;       ),
-
-&#x20;       2
-
-&#x20;   ) AS AverageDeliveryDays
-
+    c.customer_state AS State,
+    ROUND(
+        AVG(
+            TIMESTAMPDIFF(
+                HOUR,
+                o.order_purchase_timestamp,
+                o.order_delivered_customer_date
+            ) / 24
+        ),
+        2
+    ) AS AverageDeliveryDays
 FROM customers c
-
 JOIN orders o
-
-&#x20;   ON c.customer\_id = o.customer\_id
-
+    ON c.customer_id = o.customer_id
 WHERE
-
-&#x20;   o.order\_status = 'delivered'
-
-&#x20;   AND o.order\_delivered\_customer\_date IS NOT NULL
-
-GROUP BY c.customer\_state
-
+    o.order_status = 'delivered'
+    AND o.order_delivered_customer_date IS NOT NULL
+GROUP BY c.customer_state
 ORDER BY AverageDeliveryDays DESC;
+```
 
+##### **Result:**
 
+**Roraima (RR)** experiences the longest delivery delays, followed by **Amapá (AP)** and **Amazonas (AM)**.
 
+---
 
+## **3. What percentage of orders are delivered late?**
 
-Result:
+##### **Query:**
 
-
-
-RR experience longest delivery delays followed by AP and AM
-
-
-
-
-
-3.What percentage of orders are delivered late?
-
-
-
-Query:
-
-
-
+```sql
 SELECT
-
-&#x20;   ROUND(
-
-&#x20;       100.0 \*
-
-&#x20;       SUM(
-
-&#x20;           CASE
-
-&#x20;               WHEN order\_delivered\_customer\_date > order\_estimated\_delivery\_date
-
-&#x20;               THEN 1
-
-&#x20;               ELSE 0
-
-&#x20;           END
-
-&#x20;       ) / COUNT(\*),
-
-&#x20;       2
-
-&#x20;   ) AS LateOrderPercentage
-
+    ROUND(
+        100.0 *
+        SUM(
+            CASE
+                WHEN order_delivered_customer_date > order_estimated_delivery_date
+                THEN 1
+                ELSE 0
+            END
+        ) / COUNT(*),
+        2
+    ) AS LateOrderPercentage
 FROM orders
-
 WHERE
+    order_status = 'delivered'
+    AND order_delivered_customer_date IS NOT NULL;
+```
 
-&#x20;   order\_status = 'delivered'
+##### **Result:**
 
-&#x20;   AND order\_delivered\_customer\_date IS NOT NULL;
+**8.11%** of delivered orders were delivered later than the estimated delivery date.
 
+---
 
+## **4. Does longer delivery time lead to lower review scores?**
 
+##### **Query:**
 
-
-Result:
-
-
-
-8.11% orders are delivered late
-
-
-
-
-
-4.Does longer delivery time lead to lower review scores?
-
-
-
-Query:
-
-
-
+```sql
 SELECT
-
-&#x20;   r.review\_score,
-
-&#x20;   ROUND(
-
-&#x20;       AVG(
-
-&#x20;           TIMESTAMPDIFF(
-
-&#x20;               HOUR,
-
-&#x20;               o.order\_purchase\_timestamp,
-
-&#x20;               o.order\_delivered\_customer\_date
-
-&#x20;           ) / 24
-
-&#x20;       ),
-
-&#x20;       2
-
-&#x20;   ) AS AverageDeliveryDays,
-
-&#x20;   COUNT(\*) AS TotalOrders
-
+    r.review_score,
+    ROUND(
+        AVG(
+            TIMESTAMPDIFF(
+                HOUR,
+                o.order_purchase_timestamp,
+                o.order_delivered_customer_date
+            ) / 24
+        ),
+        2
+    ) AS AverageDeliveryDays,
+    COUNT(*) AS TotalOrders
 FROM orders o
-
 JOIN reviews r
-
-&#x20;   ON o.order\_id = r.order\_id
-
+    ON o.order_id = r.order_id
 WHERE
+    o.order_status = 'delivered'
+    AND o.order_delivered_customer_date IS NOT NULL
+GROUP BY r.review_score
+ORDER BY r.review_score DESC;
+```
 
-&#x20;   o.order\_status = 'delivered'
+##### **Result:**
 
-&#x20;   AND o.order\_delivered\_customer\_date IS NOT NULL
+The analysis indicates that **longer delivery times are associated with lower customer review scores**, suggesting that delivery performance has a significant impact on customer satisfaction.
 
-GROUP BY r.review\_score
+---
 
-ORDER BY r.review\_score DESC;
+## **5. Which product categories have the longest delivery times?**
 
+##### **Query:**
 
-
-
-
-Result:
-
-
-
-Yes, longer delivery time leads to lower review scores
-
-
-
-
-
-5.Which product categories have the longest delivery times?
-
-
-
-Query:
-
-
-
+```sql
 SELECT
-
-&#x20;   p.product\_category\_name AS Category,
-
-&#x20;   ROUND(
-
-&#x20;       AVG(
-
-&#x20;           TIMESTAMPDIFF(
-
-&#x20;               HOUR,
-
-&#x20;               o.order\_purchase\_timestamp,
-
-&#x20;               o.order\_delivered\_customer\_date
-
-&#x20;           ) / 24
-
-&#x20;       ),
-
-&#x20;       2
-
-&#x20;   ) AS AverageDeliveryDays
-
+    p.product_category_name AS Category,
+    ROUND(
+        AVG(
+            TIMESTAMPDIFF(
+                HOUR,
+                o.order_purchase_timestamp,
+                o.order_delivered_customer_date
+            ) / 24
+        ),
+        2
+    ) AS AverageDeliveryDays
 FROM products p
-
-JOIN order\_items oi
-
-&#x20;   ON p.product\_id = oi.product\_id
-
+JOIN order_items oi
+    ON p.product_id = oi.product_id
 JOIN orders o
-
-&#x20;   ON oi.order\_id = o.order\_id
-
+    ON oi.order_id = o.order_id
 WHERE
-
-&#x20;   o.order\_status = 'delivered'
-
-&#x20;   AND o.order\_delivered\_customer\_date IS NOT NULL
-
-GROUP BY p.product\_category\_name
-
+    o.order_status = 'delivered'
+    AND o.order_delivered_customer_date IS NOT NULL
+GROUP BY p.product_category_name
 ORDER BY AverageDeliveryDays DESC;
+```
 
+##### **Result:**
 
+**Office Furniture** has the longest average delivery time, followed by **Christmas Supplies** and **Fashion Shoes**.
 
-Result:
-
-
-
-office furniture has longest delivery times followed by Christmas supplies and fashion shoes
-
-
-
-
-
-
-
+---
